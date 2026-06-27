@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,7 +13,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
 
 import com.example.ecommerce.dtos.CreateProduct;
 import com.example.ecommerce.models.Products;
@@ -21,7 +25,10 @@ import com.example.ecommerce.share.GlobalResponse;
 import jakarta.validation.Valid;
 
 import com.example.ecommerce.abstracts.ProductService;
+import com.example.ecommerce.dtos.PaginatedResponse;
 import com.example.ecommerce.dtos.UpdateProduct;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 
 
@@ -41,11 +48,29 @@ public class ProductsController {
     }
     
     @GetMapping
-    public ResponseEntity<GlobalResponse<List<Products>>> getAllProducts() {
-        List<Products> products = productService.getAllProducts();
-        
+    public ResponseEntity<GlobalResponse<PaginatedResponse<Products>>> getAllProducts(
+        @RequestParam(defaultValue="1") int page,
+        @RequestParam(defaultValue="3") int size,
+        HttpServletRequest request
+    ) {
+        Page<Products> productsPage = productService.getAllProducts(page-1, size);
+        String baseUrl = request.getRequestURL().toString();
+        String nextUrl = productsPage.hasNext() ? String.format("%s?page=%d&size=%d", baseUrl, page + 1, size) : null;
+        String prevUrl = productsPage.hasPrevious() ? String.format("%s?page=%d&size=%d", baseUrl, page - 1, size) : null;
+
+        var pagenatedResponse = new PaginatedResponse<Products> (
+            productsPage.getContent(),
+            productsPage.getNumber(),
+            productsPage.getTotalPages(),
+            productsPage.getTotalElements(),
+            productsPage.hasNext(),
+            productsPage.hasPrevious(),
+            nextUrl,
+            prevUrl
+        );
+
         return ResponseEntity.ok(
-            new GlobalResponse<List<Products>>(products)
+            new GlobalResponse<PaginatedResponse<Products>>(pagenatedResponse)
         );
     }
 

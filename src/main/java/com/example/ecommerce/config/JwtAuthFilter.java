@@ -29,14 +29,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         System.out.println("Filter is working...");
 
         String authHeader = request.getHeader("Authorization");
-
+        
         if(authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
         String token = authHeader.substring(7);
-        // System.out.println("Username: " + username);
         String username = jwtHelper.extractUsername(token);
 
 

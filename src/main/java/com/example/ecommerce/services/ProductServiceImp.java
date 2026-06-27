@@ -1,10 +1,12 @@
 package com.example.ecommerce.services;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.ecommerce.abstracts.ProductService;
@@ -28,7 +30,7 @@ public class ProductServiceImp implements ProductService {
     public Products createProduct(CreateProduct product) {
         Categories category = categoriesRepo.findById(product.categoryId())
         .orElseThrow(() -> CustomException.resourceNotFound("Category not found with id: " + product.categoryId()));
-
+        
         if(product.quantity() < 0) {
             throw CustomException.badRequest("Product quantity cannot be negative");
         }
@@ -42,16 +44,17 @@ public class ProductServiceImp implements ProductService {
         newProduct.setQuantity(product.quantity());
         newProduct.setPrice(product.price());
         newProduct.setCategory(category);
-
+        
         productRepo.save(newProduct);
         return newProduct;
     }
-
+    
     @Override
-    public List<Products> getAllProducts() {
-        return productRepo.findAll();
+    public Page<Products> getAllProducts(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return productRepo.findAll(pageable);
     }
-
+    
     @Override
     public Products getProductsById(UUID productId) {
         Products product = productRepo.findById(productId)
@@ -105,5 +108,4 @@ public class ProductServiceImp implements ProductService {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'uploadProductImage'");
     }
-
 }
