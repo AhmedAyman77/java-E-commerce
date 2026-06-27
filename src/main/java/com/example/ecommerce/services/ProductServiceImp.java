@@ -1,5 +1,6 @@
 package com.example.ecommerce.services;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,6 +28,14 @@ public class ProductServiceImp implements ProductService {
     public Products createProduct(CreateProduct product) {
         Categories category = categoriesRepo.findById(product.categoryId())
         .orElseThrow(() -> CustomException.resourceNotFound("Category not found with id: " + product.categoryId()));
+
+        if(product.quantity() < 0) {
+            throw CustomException.badRequest("Product quantity cannot be negative");
+        }
+
+        if(product.price().compareTo(BigDecimal.ZERO) < 0) {
+            throw CustomException.badRequest("Product price cannot be negative");
+        }
 
         Products newProduct = new Products();
         newProduct.setName(product.name());
@@ -60,13 +69,24 @@ public class ProductServiceImp implements ProductService {
             currProduct.setName(product.name());
         }
         if(product.quantity() != null) {
+            if(product.quantity() < 0) {
+                throw CustomException.badRequest("Product quantity cannot be negative");
+            }
+
             currProduct.setQuantity(product.quantity());
         }
         if(product.price() != null) {
+            if(product.price().compareTo(BigDecimal.valueOf(0)) < 0) {
+                throw CustomException.badRequest("Product price cannot be negative");
+            }
+
             currProduct.setPrice(product.price());
         }
         if(product.category() != null) {
-            currProduct.setCategory(product.category());
+            Categories category = categoriesRepo.findById(product.category())
+            .orElseThrow(() -> CustomException.resourceNotFound("Category not found with id: " + product.category()));
+            
+            currProduct.setCategory(category);
         }
 
         return productRepo.save(currProduct);

@@ -1,11 +1,14 @@
 package com.example.ecommerce.models;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import com.example.ecommerce.enums.UserRole;
 
@@ -28,7 +31,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Users {
+public class Users implements UserDetails {
     @Id
     @GeneratedValue(generator = "UUID")
     @UuidGenerator
@@ -54,4 +57,10 @@ public class Users {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+    
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        // return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+        return null;
+    }
 }

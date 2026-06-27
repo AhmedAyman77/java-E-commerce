@@ -7,7 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
-import com.example.ecommerce.share.CustomResponseException;
+
+import com.example.ecommerce.share.CustomException;
+import com.example.ecommerce.share.GlobalResponse;
 
 
 @ControllerAdvice
@@ -22,10 +24,13 @@ public class GlobalExceptionResponse {
         return ResponseEntity.status(404).body(new GlobalResponse<String>(errors));
     }
 
-    @ExceptionHandler(CustomResponseException.class)
-    public ResponseEntity<GlobalResponse<?>> handleCustomResException(CustomResponseException ex) {
-        var errors = List.of(new GlobalResponse.ErrorItem(ex.getMessage()));
-        return ResponseEntity.status(ex.getCode()).body(new GlobalResponse<String>(errors));
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<GlobalResponse<?>> handleCustomResException(CustomException ex) {
+        var errors = List.of(
+            new GlobalResponse.ErrorItems(ex.getMessage())
+        );
+
+        return ResponseEntity.status(ex.getStatusCode()).body(new GlobalResponse<>(errors));
     }
 
 }

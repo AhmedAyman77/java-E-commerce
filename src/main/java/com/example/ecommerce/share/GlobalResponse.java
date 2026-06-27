@@ -2,6 +2,9 @@ package com.example.ecommerce.share;
 
 import java.util.List;
 
+import lombok.Getter;
+
+@Getter
 public class GlobalResponse<T> {
     public final static String ERROR = "error";
     public final static String SUCCESS = "success";
