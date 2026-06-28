@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import com.example.ecommerce.share.CustomException;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -33,17 +35,20 @@ public class JwtHelper {
 
     public <T> T extractFromClaims(String token, Function<Claims, T> func) {
         Claims claim = extractClaims(token);
-
         return func.apply(claim);
     }
 
     private Claims extractClaims(String token) {
-        return Jwts
+        try {
+            return Jwts
                     .parser()
                     .verifyWith(getSignInKey())
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
+        } catch (Exception e) {
+            throw CustomException.badRequest("Invalid token");
+        }
     }
 
     private SecretKey getSignInKey() {
@@ -53,24 +58,28 @@ public class JwtHelper {
 
     public boolean isTokenValid(String token, UserDetails user) {
         String username = extractUsername(token);
-        Date tokenExpirationDate = extractTokenExpirationDate(token);
 
         boolean isUserMatch = Objects.equals(username, user.getUsername());
-        boolean isDateExpried = tokenExpirationDate.before(new Date(System.currentTimeMillis()));
+        boolean isDateExpried = isTokenExpired(token);
         return isUserMatch && !isDateExpried;
     }
 
-    public String generateToken(UserDetails userDetails) {
-        return this.generateToken(new HashMap<>(), userDetails);
+    public boolean isTokenExpired(String token) {
+        Date tokenExpirationDate = extractTokenExpirationDate(token);
+        return tokenExpirationDate.before(new Date(System.currentTimeMillis()));
     }
 
-    public String generateToken(Map<String, Object> claims, UserDetails userDetails) {
+    public String generateToken(UserDetails userDetails, int period) {
+        return this.generateToken(new HashMap<>(), userDetails, period);
+    }
+
+    public String generateToken(Map<String, Object> claims, UserDetails userDetails, int period) {
         return Jwts
                     .builder()
                     .claims(claims)
                     .subject(userDetails.getUsername())
                     .issuedAt(new Date(System.currentTimeMillis()))
-                    .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 hours
+                    .expiration(new Date(System.currentTimeMillis() + period)) // 10 hours
                     .signWith(getSignInKey())
                     .compact();
     }

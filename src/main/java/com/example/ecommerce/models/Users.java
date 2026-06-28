@@ -45,7 +45,13 @@ public class Users implements UserDetails {
 
     @Column(name = "password", nullable = false, length = 255)
     private String password;
-    
+
+    @Column(name = "is_verified", columnDefinition = "BOOLEAN DEFAULT FALSE", nullable = false)
+    private boolean isVerified;
+
+    @Column(name = "verification_token", unique = true, length = 255)
+    private String verificationToken;
+
     @Enumerated(EnumType.STRING) // for JPA to store the enum as a string in the database not as an ordinal number
     @Column(name = "role", nullable = false, length = 50)
     private UserRole role = UserRole.CUSTOMER;

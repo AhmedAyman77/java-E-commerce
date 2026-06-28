@@ -7,4 +7,7 @@ import com.example.ecommerce.models.Users;
 public interface AuthService {
     String login(LoginUser loginUser);
     Users signUp(SignupUser signupUser);
+    void verifyEmail(String token);
+
+    public void resendVerificationEmail(String email);
 }

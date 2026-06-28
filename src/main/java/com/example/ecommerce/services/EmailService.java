@@ -17,8 +17,8 @@ public class EmailService {
     @Value("${spring.mail.username}")
     String from;
 
-    public void accountCreationEmail(String to, String token) {
-        String link = origin + "/auth/signup?token=" + token;
+    public void verifyAccountCreationEmail(String to, String token) {
+        String link = origin + "/auth/verify-email?token=" + token;
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(from);
         message.setTo(to);
