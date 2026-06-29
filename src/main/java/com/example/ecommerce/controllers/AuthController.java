@@ -1,5 +1,8 @@
 package com.example.ecommerce.controllers;
 
+import java.util.UUID;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,9 +38,10 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<GlobalResponse<String>> login(@Valid @RequestBody LoginUser user) {
-        String token = authService.login(user);
-        return ResponseEntity.ok(new GlobalResponse<>(token));
+    public ResponseEntity<GlobalResponse<List<String>>> login(@Valid @RequestBody LoginUser user) {
+        String refreshToken = authService.login(user);
+        String accessToken = authService.refreshToken(refreshToken);
+        return ResponseEntity.ok(new GlobalResponse<>(List.of(accessToken, refreshToken)));
     }
 
     @GetMapping("/verify-email")
@@ -50,5 +54,13 @@ public class AuthController {
     public ResponseEntity<GlobalResponse<String>> resendVerificationEmail(@RequestParam String email) {
         authService.resendVerificationEmail(email);
         return ResponseEntity.ok(new GlobalResponse<>("Verification email sent successfully"));
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<GlobalResponse<String>> refreshToken(
+        @RequestBody String refreshToken
+    ) {
+        String accessToken = authService.refreshToken(refreshToken);
+        return ResponseEntity.ok(new GlobalResponse<>(accessToken));
     }
 }

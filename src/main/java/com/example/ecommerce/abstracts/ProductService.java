@@ -3,6 +3,7 @@ package com.example.ecommerce.abstracts;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.ecommerce.dtos.CreateProduct;
 import com.example.ecommerce.dtos.UpdateProduct;
@@ -14,5 +15,5 @@ public interface ProductService {
     Products getProductsById(UUID productId);
     Products updateProduct(UUID productId, UpdateProduct product);
     void deleteProduct(UUID productId);
-    void uploadProductImage(UUID productId);
+    public String uploadImage(UUID productId, MultipartFile image);
 }

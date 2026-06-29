@@ -1,10 +1,8 @@
 package com.example.ecommerce.controllers;
 
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.ecommerce.dtos.CreateProduct;
 import com.example.ecommerce.models.Products;
@@ -39,7 +37,7 @@ public class ProductsController {
     private ProductService productService;
 
     @PostMapping
-    public ResponseEntity<GlobalResponse<Products>> postMethodName(@Valid @RequestBody CreateProduct product) {
+    public ResponseEntity<GlobalResponse<Products>> createProduct(@Valid @RequestBody CreateProduct product) {
         Products newProduct = productService.createProduct(product);
         return ResponseEntity.status(201)
         .body(
@@ -83,8 +81,10 @@ public class ProductsController {
     }
     
     @PutMapping("/{productID}")
-    public ResponseEntity<GlobalResponse<Products>> updateProduct(@PathVariable UUID productID,
-    @RequestBody UpdateProduct product) {
+    public ResponseEntity<GlobalResponse<Products>> updateProduct(
+        @PathVariable UUID productID,
+        @RequestBody UpdateProduct product
+    ) {
         Products updatedProduct = productService.updateProduct(productID, product);
         
         return ResponseEntity.ok(
@@ -99,6 +99,17 @@ public class ProductsController {
         return ResponseEntity.status(204)
         .body(
             new GlobalResponse<String>("Product deleted successfully")
+        );
+    }
+
+    @PostMapping("/{productId}/upload-image")
+    public ResponseEntity<GlobalResponse<String>> uploadImage(
+        @PathVariable UUID productId,
+        @RequestParam MultipartFile image
+    ) {
+        String imagePath = productService.uploadImage(productId, image);
+        return ResponseEntity.ok(
+            new GlobalResponse<String>(imagePath)
         );
     }
 }

@@ -56,7 +56,9 @@ public class AuthServiceImp implements AuthService {
         customClaims.put("userId", user.getId());
         customClaims.put("role", user.getRole());
         
-        return jwtHelper.generateToken(customClaims, user, 1000 * 60 * 60 * 10); // 10 hours
+        String refreshToken = jwtHelper.generateToken(customClaims, user, 1000 * 60 * 60 * 60 * 24 * 7); // 7 days
+        
+        return refreshToken;
     }
 
     @Override
@@ -108,5 +110,20 @@ public class AuthServiceImp implements AuthService {
         userRepository.save(user);
 
         emailService.verifyAccountCreationEmail(email, token);
+    }
+
+    @Override
+    public String refreshToken(String refreshToken) {
+        jwtHelper.isTokenExpired(refreshToken);
+
+        String username = jwtHelper.extractUsername(refreshToken);
+        Users user = userRepository.findByUsername(username)
+                                    .orElseThrow(() -> CustomException.resourceNotFound("User not found"));
+        
+        Map<String, Object> customClaims = new HashMap<>();
+        customClaims.put("userId", user.getId());
+        customClaims.put("role", user.getRole());
+        
+        return jwtHelper.generateToken(customClaims, user, 1000 * 60 * 60 * 10); // 10 hours
     }
 }

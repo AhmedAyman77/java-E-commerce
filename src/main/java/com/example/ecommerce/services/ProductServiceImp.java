@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.ecommerce.abstracts.ProductService;
 import com.example.ecommerce.dtos.CreateProduct;
@@ -25,6 +26,9 @@ public class ProductServiceImp implements ProductService {
 
     @Autowired
     private CategoriesRepository categoriesRepo;
+
+    @Autowired
+    private StorageService storageService;
 
     @Override
     public Products createProduct(CreateProduct product) {
@@ -104,8 +108,15 @@ public class ProductServiceImp implements ProductService {
     }
 
     @Override
-    public void uploadProductImage(UUID productId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'uploadProductImage'");
+    public String uploadImage(UUID productId, MultipartFile image) {
+        Products product = productRepo.findById(productId).orElseThrow(
+            () -> CustomException.resourceNotFound("Product not found with id: " + productId)
+        );
+
+        String imagePath = storageService.uploadImage(image);
+        product.setImagePath(imagePath);
+        productRepo.save(product);
+
+        return imagePath;
     }
 }
