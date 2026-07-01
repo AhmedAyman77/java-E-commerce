@@ -103,7 +103,7 @@ public class ProductServiceImp implements ProductService {
     public void deleteProduct(UUID productId) {
         Products product = productRepo.findById(productId)
         .orElseThrow(() -> CustomException.resourceNotFound("Product not found with id: " + productId));
-        
+    
         productRepo.delete(product);
     }
 
