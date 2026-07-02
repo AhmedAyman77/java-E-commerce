@@ -10,5 +10,5 @@ import com.example.ecommerce.models.Carts;
 
 @Repository
 public interface CartsRepository extends JpaRepository<Carts, UUID> {
-    Optional<Carts> findByUserId(UUID userId);
+    Optional<Carts> findByUserId_Id(UUID userId);
 }

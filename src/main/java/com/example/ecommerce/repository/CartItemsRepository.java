@@ -1,6 +1,7 @@
 package com.example.ecommerce.repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,6 +11,6 @@ import com.example.ecommerce.models.CartItems;
 
 @Repository
 public interface CartItemsRepository extends JpaRepository<CartItems, UUID> {
-    CartItems findByCartIdAndProductId(UUID cartId, UUID productId);
-    List<CartItems> findByCartId(UUID cartId);
+    CartItems findByCartId_IdAndProductId_Id(UUID cartId, UUID productId);
+    Optional<List<CartItems>> findByCartId_Id(UUID cartId);
 }

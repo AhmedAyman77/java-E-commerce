@@ -44,12 +44,14 @@ public class CartServiceImp implements CartService {
                 () -> CustomException.resourceNotFound("Product not found")
             );
 
-            Carts cart = new Carts();
-            cart.setUserId(user);
+            Carts cart = cartsRepository.findByUserId_Id(userId)
+                .orElseGet(() -> {
+                    Carts newCart = new Carts();
+                    newCart.setUserId(user);
+                    return cartsRepository.save(newCart);
+                });
 
-            cartsRepository.save(cart);
-
-            CartItems cartItem = cartItemsRepository.findByCartIdAndProductId(cart.getId(), product.getId());
+            CartItems cartItem = cartItemsRepository.findByCartId_IdAndProductId_Id(cart.getId(), product.getId());
             if(cartItem == null) {
                 cartItem = new CartItems();
                 cartItem.setCartId(cart);
@@ -77,11 +79,11 @@ public class CartServiceImp implements CartService {
                 () -> CustomException.resourceNotFound("Product not found")
             );
 
-            Carts cart = cartsRepository.findByUserId(user.getId()).orElseThrow(
+            Carts cart = cartsRepository.findByUserId_Id(user.getId()).orElseThrow(
                 () -> CustomException.resourceNotFound("Cart not found")
             );
 
-            CartItems cartItem = cartItemsRepository.findByCartIdAndProductId(cart.getId(), product.getId());
+            CartItems cartItem = cartItemsRepository.findByCartId_IdAndProductId_Id(cart.getId(), product.getId());
             if(cartItem == null) {
                 throw CustomException.resourceNotFound("Product not found in cart");
             }
@@ -100,10 +102,12 @@ public class CartServiceImp implements CartService {
 
     @Override
     public List<CartItems> getUserCart(UUID userId) {
-        Carts cart = cartsRepository.findByUserId(userId).orElseThrow(
+        Carts cart = cartsRepository.findByUserId_Id(userId).orElseThrow(
             () -> CustomException.resourceNotFound("Cart not found")
         );
-        return cartItemsRepository.findByCartId(cart.getId());
+        return cartItemsRepository.findByCartId_Id(cart.getId()).orElseThrow(
+            () -> CustomException.resourceNotFound("Cart items not found")
+        );
     }
 
 }
